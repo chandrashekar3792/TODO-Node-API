@@ -5,6 +5,7 @@ var {Todo}=require('./models/todos');
 var {User}=require('./models/users');
 var {ObjectId}=require('mongodb');
 var app = express();
+var _=require('lodash');
 app.use(bodyParser.json());
 
 app.post('/todos',(req,res)=>{
@@ -50,6 +51,28 @@ app.delete('/todos/:id',(req,res)=>{
     res.send({todo:todo});
   }).catch((e)=>{
     res.status(400).send(e);
+  });
+});
+
+app.patch('/todos/:id',(req,res)=>{
+  var id=req.params.id;
+  if(!ObjectId.isValid(id)){
+    return res.status(404).send({message:'Not Valid Id'});
+  }
+  if(_.isBoolean(req.body.completed)&&req.body.completed){
+    req.body.completedAt=new Date().getTime();
+  }else{
+    req.body.completed=false;
+    req.body.completedAt=null;
+  }
+
+  Todo.findByIdAndUpdate(id,{$set:req.body},{new:true}).then((todo)=>{
+    if(!todo){
+       return res.status(404).send('dn');
+    }
+    res.send({todo:todo});
+  }).catch((e)=>{
+     res.status(404).send();
   });
 });
 
