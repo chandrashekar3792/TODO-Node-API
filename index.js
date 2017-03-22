@@ -38,6 +38,20 @@ app.get('/todos/:id',(req,res)=>{
     res.status(400).send(e);
   });
 });
+app.delete('/todos/:id',(req,res)=>{
+  var id=req.params.id;
+  if(!ObjectId.isValid(id)){
+    return res.status(404).send({message:'Not Valid Id'});
+  }
+  Todo.findByIdAndRemove(id).then((todo)=>{
+    if(!todo){
+      return res.status(400).send({message:'Not a valid id'});
+    }
+    res.send({todo:todo});
+  }).catch((e)=>{
+    res.status(400).send(e);
+  });
+});
 
 app.listen(3000,(err,res)=>{
   if(!err){
