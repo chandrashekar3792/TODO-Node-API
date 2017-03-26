@@ -1,14 +1,8 @@
 var mongoose=require('mongoose');
 var validator=require('validator');
-var User=mongoose.model('User',{
-  // {
-  //   email:'chandrashekar998@gmail.com',
-  //   password:'myPass123',
-  //   tokens:[{
-  //     access:'auth',
-  //     token:'dddweddcedcfeeee'
-  //   }]
-  // },
+const jwt=require('jsonwebtoken');
+var UserSchema=new mongoose.Schema({
+
   email:{
     type:String,
     required:true,
@@ -25,7 +19,7 @@ var User=mongoose.model('User',{
     required:true,
     minlength:6
   },
-  token:[{
+  tokens:[{
     access:{
       type:String,
       required:true
@@ -36,6 +30,19 @@ var User=mongoose.model('User',{
     }
   }]
 });
+
+UserSchema.methods.generateAuthToken=function(){
+  var user = this;
+  var access ='auth';
+  var token=jwt.sign({_id:user._id.toHexString(),acess},'chandru').toString();
+
+  user.tokens.push({access,token});
+
+  return user.save().then(()=>{
+    return token;
+  });
+}
+var User=mongoose.model('User',UserSchema);
 
 module.exports={
   User
